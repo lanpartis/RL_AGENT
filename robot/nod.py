@@ -1,5 +1,5 @@
 # Choregraphe simplified export in Python.
-IP='192.168.1.65'
+IP='192.168.1.166'
 # Choregraphe simplified export in Python.
 from naoqi import ALProxy
 names = list()

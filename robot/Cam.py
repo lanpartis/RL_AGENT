@@ -40,7 +40,12 @@ class Cam():
         rospy.set_param(fishcam+'/theora/keyframe_frequency',FPS)
         rospy.set_param(rgbcam+'/theora/keyframe_frequency',FPS)
         rospy.set_param(depthcam+'/theora/keyframe_frequency',FPS)
-    
+        print 'init camera'
+        while True:
+            state = self.get_state(fishcam,3)
+            if state[0] is not False:
+                break
+
     def get_size(self,name):
         return len(glob_states[name].state)
     def get_state(self,name,delay):

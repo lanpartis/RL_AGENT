@@ -2,12 +2,17 @@ robot_ip="192.168.1.166"
 port=9559
 
 from naoqi import ALProxy
+import time
 import glob
 import json
+import os
+import random
+dirpath=os.path.dirname(os.path.abspath(__file__))
 
 class Pepper():
     def __init__(self,ip=robot_ip,port=port):
         self.motion=ALProxy("ALMotion",ip,port)
+        self.motion.wakeUp()
         self.actions=load_act()
         camProxy = ALProxy("ALVideoDevice", ip, port)
         resolution = 1    # VGA
@@ -33,6 +38,16 @@ class Pepper():
         faceWidth = 0.1
         self.tracker.registerTarget(targetName, faceWidth)
         self.tracker.track(targetName)
+        acts=open(dirpath+'/actions/actions.data').readlines()
+        for i in range(len(acts)):
+            if acts[i][-1] == '\n':
+                acts[i] = acts[i][:-1]
+        self.action_list=acts
+        miracts=open(dirpath+'/actions/mirror_act.data').readlines()
+        for i in range(len(miracts)):
+            if miracts[i][-1] == '\n':
+                miracts[i] = miracts[i][:-1]
+        self.mirror_action_list = miracts
 
 
     def perform(self,name,angles,times,isAbsolute=True):
@@ -41,6 +56,14 @@ class Pepper():
         self.motion.setExternalCollisionProtectionEnabled("Arms", True)
 
     def perform_act(self,name):
+        if name == 'look':
+            time.sleep(3)
+            return
+        if name in self.mirror_action_list:
+            if random.random()>=0.5:
+                name = name+'_l'
+            else:
+                name = name+'_r'
         act = self.actions[name]
         names=list()
         keys=list()
@@ -54,7 +77,7 @@ class Pepper():
 
 def load_act():
     acts=dict()
-    fils = glob.glob('actions/*.json')
+    fils = glob.glob(dirpath+'/actions/*.json')
     for fil in fils:
         act_j = json.load(open(fil))
         acts[act_j['name']]=act_j['frames']
