@@ -367,7 +367,7 @@ def data_augment(dataset,labels,nolabels,size=NUM_OF_EACH,sel=True,mix=False):
     for i in dataset:
         smoothing_filter(i)
     train_data,train_labels,test_data,test_labels=data_split(dataset,labels)
-    train_data,train_labels=data_balance(train_data,train_labels,size=16*5,mix=mix)
+    train_data,train_labels=data_balance(train_data,train_labels,size=16*6,mix=mix)
     test_data,test_labels=data_balance(test_data,test_labels,size=16*2,mix=mix)
     train_data,train_labels=add_mirror_data(train_data,train_labels)
     test_data,test_labels=add_mirror_data(test_data,test_labels)

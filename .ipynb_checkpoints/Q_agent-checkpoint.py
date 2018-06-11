@@ -1,44 +1,31 @@
-import random
-from NN_models.Q_model import DQN as Q_model
-from torch.optim import Adam
-from torch.autograd import Variable
-import torch
-import thread
-import os
-import numpy as np
-from PIL import Image
-import glob
-use_GPU = False
-PILMODE='L'
+
 class DQNAgent:
     model_path='DQN_models'
     memory_path='RL_DATA/'
     state_file=memory_path+'STATE'
-    action_file=memory_path+'aACTION'
+    action_file=memory_path+'ACTION'
     ep_reward_file=memory_path+'ep_reward.dat'
     batch_size = 25
     epsilon = 1
     epsilon_decay = 0.99
     epsilon_final = 0.1
     epsilon_endtime = 30000
-    action_size = 5
+    action_size = 6
     discount_factor = 0.7
     n_replay = 1 #replay per learning step
-    learn_start = 3000
-    replay_memory = 30000
     clip_delta = 1
 
-    def __init__(self,episode=0):
+    def __init__(self,episode=1):
         self.ep = episode
-        if episode==0:
-            self.F_model = Q_model()
-            self.target_F_model = Q_model()
+        if episode==1:
+            self.F_model = Q_model(output_shape=actionsize)
+            self.target_F_model = Q_model(output_shape=actionsize)
         else:
             self.load_model(episode)
         if use_GPU:
             self.F_model.cuda()
             self.target_F_model.cuda()
-#         self.Y_optimizer = torch.optim.Adam(self.Y_model.parameters(),1e-4)
+        self.F_optimizer = Adam(self.F_model.parameters(),1e-4)
     
     def get_action(self,state):
         nsize = [1,]
@@ -53,8 +40,8 @@ class DQNAgent:
         return max
     def get_action_eps(self,state):
         if random.random() <= self.epsilon:
-            #if self.epsilon > self.epsilon_final:
-                #self.epsilon*=self.epsilon_decay
+            if self.epsilon > self.epsilon_final:
+                self.epsilon*=self.epsilon_decay
             return random.randint(0,self.action_size-1)
         return self.get_action(state)
             
@@ -77,6 +64,52 @@ class DQNAgent:
     def update_target_model(self):
         self.target_F_model.load_state_dict(self.F_model.state_dict())
         
+    def experience_replay(self,N=10,batchsize=25):
+        memory = load_memory_of_episode(self.ep)
+        for i in range(int(N*len(memory)/batchsize)):
+            minibatch = random.sample(memory,batchsize)
+            shape=[batchsize,]
+            shape.extend(input_shape)
+            update_input = np.zeros(shape)
+            update_target = np.zeros((batchsize, self.action_size))
+            for j in range(batchsize):
+                state = minibatch[j]['state']
+                action = int(minibatch[j]['action'])
+                reward = minibatch[j]['reward']
+                n_state = minibatch[j]['n_state']
+                
+                ystate = Variable(torch.FloatTensor(state))
+                nstate = Variable(torch.FloatTensor(n_state))
+                nshape=[1,]
+                nshape.extend(ystate.size())
+                ystate = ystate.view(nshape)
+                nstate = nstate.view(nshape)
+                if use_GPU:
+                    ystate = ystate.cuda()
+                    nstate = nstate.cuda()
+                target = self.F_model.forward(ystate)[0].cpu().data.numpy()
+                q_2 =self.target_F_model.forward(nstate)
+                q_2_max = torch.max(q_2).cpu().data.numpy()
+                target[action] = reward + self.discount_factor*q_2_max
+
+                update_input[i] = state
+                update_target[i] = target
+            
+            update_input=Variable(torch.FloatTensor(update_input))
+            update_target=Variable(torch.FloatTensor(update_target))
+            if use_GPU:
+                update_input=update_input.cuda()
+                update_target=update_target.cuda()
+            prediction=self.F_model.forward(update_input)
+            loss = loss_func(prediction,update_target)
+
+            self.F_model.zero_grad()
+            loss.backward()
+            
+            for param in self.F_model.parameters():
+                param.grad.data.clamp_(-1,1)
+            self.F_optimizer.step()
+        self.update_target_model()
     
 def save_state(state,ep,time_stamp):
     s_dir='RL_DATA/EP%d/STATE/s%04d'%(ep,time_stamp)
