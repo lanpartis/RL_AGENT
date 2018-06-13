@@ -11,7 +11,7 @@ FPS=8
 class State():
     def __init__(self,maxlen=24):
         self.state=list()
-        self.size=24
+        self.size=50
     def put(self,img):
         self.state.append(img)
         if len(self.state)>self.size:
@@ -27,19 +27,10 @@ glob_states[rgbcam]=State()
 glob_states[depthcam]=State()
 class Cam():
     def __init__(self,FPS=FPS,state=State(time_len*FPS)):
-        self.FPS=FPS
-        rospy.set_param('/camera/driver/color_width',480)
-        rospy.set_param('/camera/driver/depth_width',480)
-        rospy.set_param('/camera/driver/color_height',480)
-        rospy.set_param('/camera/driver/depth_height',480)
-        
         rospy.init_node('cam_listener',anonymous=True)
         rospy.Subscriber(fishcam,Image,callback_fish)
         rospy.Subscriber(rgbcam,Image,callback_rgb)
         rospy.Subscriber(depthcam,Image,callback_depth)
-        rospy.set_param(fishcam+'/theora/keyframe_frequency',FPS)
-        rospy.set_param(rgbcam+'/theora/keyframe_frequency',FPS)
-        rospy.set_param(depthcam+'/theora/keyframe_frequency',FPS)
         print 'init camera'
         while True:
             state = self.get_state(fishcam,3)

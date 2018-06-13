@@ -14,7 +14,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy import stats, signal, interpolate
 OpenPose_LABEL = ["Nose","Neck","RShoulder","RElbow","RWrist","LShoulder","LElbow","LWrist","RHip","RKnee","RAnkle","LHip","LKnee","LAnkle","REye","LEye","REar","LEar","Background"]
 KINECT_LABEL = ['HEAD','NECK','TORSO','RIGHT_SHOULDER','RIGHT_ELBOW','RIGHT_HAND','LEFT_SHOULDER','LEFT_ELBOW','LEFT_HAND','RIGHT_HIP','RIGHT_KNEE','RIGHT_FOOT','LEFT_HIP','LEFT_KNEE','LEFT_FOOT']
-Image_Size = [736,736]# [Width, Heighth]
+Image_Size=[240,240]
+UImage_Size = [736,736]# [Width, Heighth]
 fig=plt.gcf()
 fig.set_size_inches(20, 10)
 ori_categories=['wave_hand',
@@ -166,7 +167,7 @@ def Pair2draw(Pair,f,fps=8):# [N, person_id, keypoint, x or y] -> [N,feature_num
             
 # 前処理関連
 def normalization(Pair):
-    Pair[:,:,:,0],Pair[:,:,:,1] = Pair[:,:,:,0]/Image_Size[0] - 0.5,Pair[:,:,:,1]/Image_Size[1]-0.5
+    Pair[:,:,:,0],Pair[:,:,:,1] = Pair[:,:,:,0]/Image_Size[0] - 0.5,Pair[:,:,:,1]/UImage_Size[1]-0.5
     return Pair
 
 def replace_outlier(df,under=0.1,top=0.9):

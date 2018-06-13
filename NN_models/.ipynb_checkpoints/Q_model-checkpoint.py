@@ -5,11 +5,11 @@ from torch.autograd import Variable
 from torch import autograd
 use_GPU = torch.cuda.is_available()
 
-input_shape = [24,480,640]
+input_shape = [24,240,240]
 output_shape=6
-units =[16,32,64,256]
+units =[64,128,256,1024]
 ker_size = [9,5,5]
-st_size = [3,2,1]
+st_size = [3,1,1]
 p_s=2 #pooling_size,pooling_strides
 fss=4*5 #final state size
 
@@ -17,20 +17,20 @@ class DQN(nn.Module):
     def __init__(self,input_shape=input_shape,output_shape=output_shape):
         super(DQN,self).__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(input_shape[0],units[0],kernel_size=ker_size[0],stride=st_size[0]),
+            nn.Conv2d(input_shape[0],units[0],kernel_size=ker_size[0],stride=st_size[0],padding=2),
             # nn.BatchNorm2d(n_s[0]),
             nn.ReLU(),
             nn.MaxPool2d(p_s,p_s),
         )
 
         self.conv2 =nn.Sequential(
-            nn.Conv2d(units[0],units[1],kernel_size=ker_size[1],stride = st_size[1]),
+            nn.Conv2d(units[0],units[1],kernel_size=ker_size[1],stride = st_size[1],padding=1),
             # nn.BatchNorm2d(n_s[1]),
             nn.ReLU(),
             nn.MaxPool2d(p_s,p_s),
         )
         self.conv3 =nn.Sequential(
-            nn.Conv2d(units[1],units[2],kernel_size=ker_size[1],stride = st_size[1]),
+            nn.Conv2d(units[1],units[2],kernel_size=ker_size[2],stride = st_size[2],padding=1),
             # nn.BatchNorm2d(n_s[2]),
             nn.ReLU(),
             nn.MaxPool2d(p_s,p_s),

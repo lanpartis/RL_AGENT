@@ -1,17 +1,35 @@
-
+import random
+from NN_models.Q_model import DQN as Q_model
+from torch.optim import Adam
+from torch.autograd import Variable
+from torch import nn
+import torch
+import thread
+import os
+import json
+import numpy as np
+from PIL import Image
+import glob
+use_GPU = torch.cuda.is_available()
+PILMODE='L'
+Image_Size=[240,240]
+input_shape = [24,240,240]
+actionsize=6
+loss_func=nn.MSELoss()
+if use_GPU:
+    loss_func = loss_func.cuda()
 class DQNAgent:
     model_path='DQN_models'
     memory_path='RL_DATA/'
     state_file=memory_path+'STATE'
     action_file=memory_path+'ACTION'
-    ep_reward_file=memory_path+'ep_reward.dat'
     batch_size = 25
     epsilon = 1
     epsilon_decay = 0.99
     epsilon_final = 0.1
     epsilon_endtime = 30000
     action_size = 6
-    discount_factor = 0.7
+    discount_factor = 0.9
     n_replay = 1 #replay per learning step
     clip_delta = 1
 
@@ -40,8 +58,8 @@ class DQNAgent:
         return max
     def get_action_eps(self,state):
         if random.random() <= self.epsilon:
-            if self.epsilon > self.epsilon_final:
-                self.epsilon*=self.epsilon_decay
+            #if self.epsilon > self.epsilon_final:
+                #self.epsilon*=self.epsilon_decay
             return random.randint(0,self.action_size-1)
         return self.get_action(state)
             
