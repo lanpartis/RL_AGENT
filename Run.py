@@ -6,8 +6,9 @@ import time
 from PIL import Image
 import torch
 from torchvision.transforms import Compose,ToTensor,Resize
+import numpy as np
 Image_size=[240,240]
-ip='192.168.1.166'
+ip='192.168.1.121'
 robot = Pepper.Pepper(ip=ip)
 cam = Cam.Cam()
 Q_Agent = DQNAgent()
@@ -33,7 +34,7 @@ def to_tensor(imgs):
         img = ToTensor()(img)
         res.append(img)
     return torch.cat(res,dim=0)
-    
+
 def proc_state(state):
     s_tensor=[]
     for s in state:

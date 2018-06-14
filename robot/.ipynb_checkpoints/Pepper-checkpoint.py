@@ -14,13 +14,12 @@ class Pepper():
         self.motion=ALProxy("ALMotion",ip,port)
         self.motion.wakeUp()
         self.actions=load_act()
-        camProxy = ALProxy("ALVideoDevice", ip, port)
-        resolution = 1    # VGA
-        colorSpace = 0   # Y channel
+        #camProxy = ALProxy("ALVideoDevice", ip, port)
+        #resolution = 1    # VGA
+        #colorSpace = 0   # Y channel
 
-        upper_cam = camProxy.subscribeCamera("Ucam",0, resolution, colorSpace, 5)
-        depth = camProxy.subscribeCamera("Dcam",2, resolution, colorSpace, 5)
-
+        #upper_cam = camProxy.subscribeCamera("Ucam",0, resolution, colorSpace, 5)
+        #depth = camProxy.subscribeCamera("Dcam",2, resolution, colorSpace, 5)
         basic_awareness = ALProxy("ALBasicAwareness",ip, port)
 
         basic_awareness.setStimulusDetectionEnabled("People",True)
@@ -31,8 +30,8 @@ class Pepper():
         basic_awareness.setParameter("LookStimulusSpeed",0.7)
         basic_awareness.setParameter("LookBackSpeed",0.5)
         basic_awareness.setEngagementMode("FullyEngaged")
-        basic_awareness.setTrackingMode("Head")
-
+        basic_awareness.setTrackingMode("BodyRotation")
+        
         self.tracker = ALProxy("ALTracker", ip, port)
         targetName = "Face"
         faceWidth = 0.1
