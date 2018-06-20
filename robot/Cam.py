@@ -53,7 +53,7 @@ def callback_fish(data):
     if now - FISH_LAST >=float(1/FPS):
         data = img_util.image_to_numpy(data)
         glob_states[fishcam].put(data)
-        FISH_LAST = now
+        FISH_LAST += float(1/FPSs) 
         print 'fisheye ',now
     else:
         print 'drop image'
